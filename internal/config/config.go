@@ -30,6 +30,7 @@ type DockSettings struct {
 	MinimizeToApplication bool `yaml:"minimize-to-application"`
 	AutoHide              bool `yaml:"autohide"`
 	ShowRecents           bool `yaml:"show-recents"`
+	SizeImmutable         bool `yaml:"size-immutable"`
 }
 
 func Load(file string) (Config, error) {

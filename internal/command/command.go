@@ -71,6 +71,7 @@ func SaveConfig(c *Config) (err error) {
 		MinimizeToApplication: dPlist.MinimizeToApplication,
 		AutoHide:              dPlist.AutoHide,
 		ShowRecents:           dPlist.ShowRecents,
+		SizeImmutable:         dPlist.SizeImmutable,
 	}
 
 	if err := os.MkdirAll(filepath.Dir(c.File), 0750); err != nil {

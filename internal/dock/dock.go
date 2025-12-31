@@ -29,6 +29,7 @@ type Plist struct {
 	MinimizeToApplication bool     `plist:"minimize-to-application"`
 	AutoHide              bool     `plist:"autohide"`
 	ShowRecents           bool     `plist:"show-recents"`
+	SizeImmutable         bool     `plist:"size-immutable"`
 }
 
 type FileData struct {
@@ -159,6 +160,7 @@ func (p *Plist) ApplySettings(setting config.DockSettings) error {
 	p.MinimizeToApplication = setting.MinimizeToApplication
 	p.AutoHide = setting.AutoHide
 	p.ShowRecents = setting.ShowRecents
+	p.SizeImmutable = setting.SizeImmutable
 
 	switch v := setting.TileSize.(type) {
 	case float64:

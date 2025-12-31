@@ -17,3 +17,4 @@ dock_items:
     minimize-to-application: true
     autohide: true
     show-recents: false
+    size-immutable: true
