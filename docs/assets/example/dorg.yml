@@ -1,0 +1,19 @@
+dock_items:
+  apps:
+    - /System/Applications/App Store.app
+    - /System/Applications/Calculator.app
+    - /System/Applications/Notes.app
+    - /System/Applications/Photos.app
+  others:
+    - path: "~"
+      sort: 1
+      display: 1
+    - path: ~/Downloads
+      sort: 1
+  settings:
+    tilesize: 35
+    largesize: 38
+    magnification: true
+    minimize-to-application: true
+    autohide: true
+    show-recents: false
