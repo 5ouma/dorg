@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=jcroql
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    - ./.hack/make/completions
+builds:
+  - id: darwin
+    binary: lporg
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags: -s -w -X github.com/blacktop/lporg/cmd.AppVersion={{.Version}} -X github.com/blacktop/lporg/cmd.AppBuildTime={{.Date}}
+
+universal_binaries:
+  - id: darwin
+    replace: true
+    name_template: "lporg"
+
+archives:
+  - name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- if eq .Os "darwin" }}macOS
+      {{- else if eq .Os "ios" }}iOS
+      {{- else }}{{ .Os }}{{ end }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else if eq .Arch "all" }}universal    
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    builds_info:
+      group: root
+      owner: root
+    files:
+      - README.md
+      - LICENSE
+      - completions/*
+
+checksum:
+  name_template: "checksums.txt"
+  disable: false
+
+signs:
+  - artifacts: checksum
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+brews:
+  - repository:
+      owner: blacktop
+      name: homebrew-tap
+    directory: Formula
+    homepage: "https://github.com/blacktop/lporg"
+    description: Organize Your macOS Launchpad Apps
+    license: MIT
+    install: |
+      bin.install "lporg"
+      bash_completion.install "completions/_bash" => "lporg"
+      zsh_completion.install "completions/_zsh" => "_lporg"
+      fish_completion.install "completions/_fish" => "lporg.fish"
+    test: |
+      system "#{bin}/lporg --version"
+
+changelog:
+  sort: asc
+  use: github
+  groups:
+    - title: Dependency updates
+      regexp: '^.*?(feat|fix|chore)\(deps\)!?:.+$'
+      order: 300
+    - title: "New Features"
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 100
+    - title: "Security updates"
+      regexp: '^.*?sec(\([[:word:]]+\))??!?:.+$'
+      order: 150
+    - title: "Bug fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 200
+    - title: "Documentation updates"
+      regexp: ^.*?(doc|docs)(\([[:word:]]+\))??!?:.+$
+      order: 400
+    - title: "Build process updates"
+      regexp: ^.*?build(\([[:word:]]+\))??!?:.+$
+      order: 400
+    - title: Other work
+      order: 9999
+  filters:
+    include:
+      - "^feat.*"
+      - "^fix.*"
+      - "^chore.*"
+      - "^sec.*"
+      - "^(doc|docs).*"
+
+release:
+  name_template: "v{{ .Version }}"
+  footer: |
+    ### Summary
+    **Full Changelog**: https://github.com/blacktop/lporg/compare/{{ .PreviousTag }}...{{ .Tag }}
+    ## What to do next?
+    - Follow us on [Twitter](https://twitter.com/blacktop__)
