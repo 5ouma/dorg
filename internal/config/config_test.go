@@ -7,6 +7,8 @@ import (
 )
 
 func Test_Load(t *testing.T) {
+	t.Parallel()
+
 	tmp := t.TempDir()
 
 	tests := map[string]struct {

@@ -1,6 +1,8 @@
 package dock
 
 import (
+	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,6 +11,8 @@ import (
 )
 
 func Test_FileNameWithoutExtTrimSuffix(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		in   string
 		want string
@@ -43,6 +47,7 @@ func Test_TilePathGetters(t *testing.T) {
 }
 
 func Test_AddApp(t *testing.T) {
+	t.Parallel()
 
 	tests := map[string]struct {
 		in       string
@@ -69,6 +74,8 @@ func Test_AddApp(t *testing.T) {
 }
 
 func Test_AddOther(t *testing.T) {
+	t.Parallel()
+
 	home, _ := os.UserHomeDir()
 
 	tests := map[string]struct {
@@ -104,6 +111,7 @@ func Test_AddOther(t *testing.T) {
 }
 
 func Test_ApplySettings(t *testing.T) {
+	t.Parallel()
 
 	tests := map[string]struct {
 		in      config.DockSettings
@@ -119,6 +127,57 @@ func Test_ApplySettings(t *testing.T) {
 			p := &Plist{}
 			if err := p.ApplySettings(tc.in); (err != nil) != tc.wantErr {
 				t.Fatalf("ApplySettings error = %v, wantErr=%v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func Test_GenerateConfigFromPlist(t *testing.T) {
+	t.Parallel()
+
+	home, _ := os.UserHomeDir()
+	tests := map[string]struct {
+		plist Plist
+		want  config.Config
+	}{
+		"all": {
+			plist: Plist{
+				PersistentApps:        []PAItem{{TileData: TileData{FileData: FileData{URLString: "file:///Applications/Calculator.app/"}}}},
+				PersistentOthers:      []POItem{{TileData: POTileData{Arrangement: 1, DisplayAs: 2, ShowAs: 3, FileData: FileData{URLString: filepath.Join(home, "Documents") + "/"}}}},
+				TileSize:              32,
+				LargeSize:             64,
+				Magnification:         true,
+				MinimizeToApplication: true,
+				AutoHide:              true,
+				ShowRecents:           true,
+			},
+			want: config.Config{Dock: config.Dock{
+				Apps:     []string{"/Applications/Calculator.app"},
+				Others:   []config.Folder{{Path: "~/Documents", Sort: 1, Display: 2, View: 3}},
+				Settings: &config.DockSettings{TileSize: 32, LargeSize: 64, Magnification: true, MinimizeToApplication: true, AutoHide: true, ShowRecents: true},
+			}},
+		},
+	}
+	for name, tc := range tests {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			conf, err := tc.plist.GenerateConfigFromPlist()
+			if err != nil {
+				t.Fatalf("GenerateConfigFromPlist error: %v", err)
+			}
+
+			gotData, err := json.Marshal(conf)
+			if err != nil {
+				t.Fatalf("json marshal got error: %v", err)
+			}
+			wantData, err := json.Marshal(tc.want)
+			if err != nil {
+				t.Fatalf("json marshal want error: %v", err)
+			}
+			if !bytes.Equal(gotData, wantData) {
+				t.Fatalf("config mismatch\n got: %s\nwant: %s", string(gotData), string(wantData))
 			}
 		})
 	}
