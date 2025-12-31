@@ -32,11 +32,11 @@ func Test_CommandFlags(t *testing.T) {
 	tests := map[string]struct {
 		makeCmd func() *cobra.Command
 	}{
-		"load": {makeCmd: newLoadCmd},
-		"save": {makeCmd: newSaveCmd},
+		"check": {makeCmd: newCheckCmd},
+		"load":  {makeCmd: newLoadCmd},
+		"save":  {makeCmd: newSaveCmd},
 	}
 	for name, tc := range tests {
-		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -61,11 +61,11 @@ func Test_execCommands(t *testing.T) {
 		makeCmd func() *cobra.Command
 		execFn  func(*cobra.Command, []string) error
 	}{
-		"load": {makeCmd: newLoadCmd, execFn: execLoadCmd},
-		"save": {makeCmd: newSaveCmd, execFn: execSaveCmd},
+		"check": {makeCmd: newCheckCmd, execFn: execCheckCmd},
+		"load":  {makeCmd: newLoadCmd, execFn: execLoadCmd},
+		"save":  {makeCmd: newSaveCmd, execFn: execSaveCmd},
 	}
 	for name, tc := range tests {
-		name, tc := name, tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	dockPlistPath       = "/Library/Preferences/com.apple.dock.plist"
+	dockPlistPath       = "Library/Preferences/com.apple.dock.plist"
 	dockLaunchAgentID   = "com.apple.Dock.agent"
 	dockLaunchAgentPath = "/System/Library/LaunchAgents/com.apple.Dock.agent.plist"
 )
