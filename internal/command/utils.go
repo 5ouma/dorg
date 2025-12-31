@@ -79,48 +79,10 @@ func restartDock() error {
 	return nil
 }
 
-func removeOldDatabaseFiles(dbpath string) error {
-
-	paths := []string{
-		filepath.Join(dbpath, "db"),
-		filepath.Join(dbpath, "db-shm"),
-		filepath.Join(dbpath, "db-wal"),
-	}
-
-	for _, path := range paths {
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			utils.Indent(log.WithField("path", path).Warn, 3)("DB file not found")
-			continue
-		}
-		if err := os.Remove(path); err != nil {
-			return errors.Wrap(err, "removing file failed")
-		}
-		utils.Indent(log.WithField("path", path).Info, 3)("removed old DB file")
-	}
-
-	return restartDock()
-}
-
 func getiCloudDrivePath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("failed to get user home directory: %w", err)
 	}
 	return filepath.Join(home, "Library/Mobile Documents/com~apple~CloudDocs"), nil
-}
-
-func split[T any](buf []T, lim int) [][]T {
-	var chunk []T
-	chunks := make([][]T, 0, lim)
-	for _, b := range buf {
-		chunk = append(chunk, b)
-		if len(chunk) == lim {
-			chunks = append(chunks, chunk)
-			chunk = nil
-		}
-	}
-	if len(chunk) > 0 {
-		chunks = append(chunks, chunk)
-	}
-	return chunks
 }
