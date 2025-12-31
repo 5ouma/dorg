@@ -1,0 +1,20 @@
+name: 🏷️ Labeler
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  labeler:
+    name: 🏷️ Labeler
+    permissions:
+      pull-requests: write
+    runs-on: Ubuntu-Slim
+    timeout-minutes: 1
+
+    steps:
+      - name: 🏷️ Add labels to PR
+        uses: fuxingloh/multi-labeler@b15a54460c38f54043fa75f7b08a0e2aa5b94b5b # v4.0.0
+        with:
+          config-repo: 5ouma/utils

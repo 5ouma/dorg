@@ -1,0 +1,34 @@
+changelog:
+  exclude:
+    labels:
+      - ◀️ Revert
+      - 🧠 Meta
+      - 🚀 Release
+
+  categories:
+    - title: 🧨 Breaking Changes
+      labels: [🧨 Breaking Change]
+    - title: 🎉 New Features
+      labels: [🎉 New Feature]
+    - title: 🧰 Bug Fixes
+      labels: [🧰 Bug]
+    - title: 📖 Documentation Changes
+      labels: [📖 Documentation]
+    - title: 🎨 Style Updates
+      labels: [🎨 Style]
+    - title: 🧹 Refactoring
+      labels: [🧹 Refactoring]
+    - title: 🏎️ Performance Improvements
+      labels: [🏎️ Performance]
+    - title: 🧪 Testing
+      labels: [🧪 Testing]
+    - title: 🔨 Build Updates
+      labels: [🔨 Build]
+    - title: 🎽 CI
+      labels: [🎽 CI]
+    - title: 🔧 Maintenance
+      labels: [🔧 Maintenance]
+    - title: ⛓️ Dependency Updates
+      labels: [⛓️ Dependencies]
+    - title: 🔍 Other Changes
+      labels: ["*"]
