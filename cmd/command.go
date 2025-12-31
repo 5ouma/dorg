@@ -5,11 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	AppVersion   string
-	AppBuildTime string
-)
-
 func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "dorg",

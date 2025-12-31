@@ -87,16 +87,16 @@ func LoadDockPlist() (*Plist, error) {
 		return nil, fmt.Errorf("failed to get user home directory: %v", err)
 	}
 
-	var dPlist Plist
+	dPlist := new(Plist)
 	data, err := os.ReadFile(filepath.Join(home, dockPlistPath))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read dock plist: %v", err)
 	}
-	if _, err := plist.Unmarshal(data, &dPlist); err != nil {
+	if _, err := plist.Unmarshal(data, dPlist); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal dock plist: %v", err)
 	}
 
-	return &dPlist, nil
+	return dPlist, nil
 }
 
 func (p *Plist) AddApp(appPath string) {
@@ -241,4 +241,45 @@ func (p *Plist) restart() error {
 		return fmt.Errorf("failed to start Dock launch agent: %v", err)
 	}
 	return nil
+}
+
+func (p *Plist) GenerateConfigFromPlist() (config.Config, error) {
+	conf := new(config.Config)
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return *conf, fmt.Errorf("failed to get user home dir: %w", err)
+	}
+
+	fmt.Println(utils.H2.Render("Apps"))
+	for _, item := range p.PersistentApps {
+		fmt.Println(utils.CheckedItem.Render(), item.TileData.GetPath())
+		conf.Dock.Apps = append(conf.Dock.Apps, item.TileData.GetPath())
+	}
+
+	fmt.Println(utils.H2.Render("Folders"))
+	for _, item := range p.PersistentOthers {
+		path := item.TileData.GetPath()
+		if relPath, err := filepath.Rel(home, path); err == nil {
+			path = filepath.Join("~", relPath)
+		}
+		fmt.Println(utils.CheckedItem.Render(), path)
+		conf.Dock.Others = append(conf.Dock.Others, config.Folder{
+			Path:    path,
+			Sort:    item.TileData.Arrangement,
+			Display: item.TileData.DisplayAs,
+			View:    item.TileData.ShowAs,
+		})
+	}
+
+	conf.Dock.Settings = &config.DockSettings{
+		TileSize:              p.TileSize,
+		LargeSize:             p.LargeSize,
+		Magnification:         p.Magnification,
+		MinimizeToApplication: p.MinimizeToApplication,
+		AutoHide:              p.AutoHide,
+		ShowRecents:           p.ShowRecents,
+	}
+
+	return *conf, nil
 }

@@ -31,55 +31,22 @@ func (c *Config) Verify() error {
 }
 
 func SaveConfig(c *Config) (err error) {
-	var conf config.Config
-
 	dPlist, err := dock.LoadDockPlist()
 	if err != nil {
 		return errors.Wrap(err, "unable to load dock plist")
 	}
 
-	fmt.Println(utils.H2.Render("Apps"))
-	for _, item := range dPlist.PersistentApps {
-		fmt.Println(utils.CheckedItem.Render(), item.TileData.GetPath())
-		conf.Dock.Apps = append(conf.Dock.Apps, item.TileData.GetPath())
-	}
-
-	home, err := os.UserHomeDir()
+	conf, err := dPlist.GenerateConfigFromPlist()
 	if err != nil {
-		return fmt.Errorf("failed to get user home dir: %w", err)
-	}
-
-	fmt.Println(utils.H2.Render("Folders"))
-	for _, item := range dPlist.PersistentOthers {
-		path := item.TileData.GetPath()
-		if relPath, err := filepath.Rel(home, path); err == nil {
-			path = filepath.Join("~", relPath)
-		}
-		fmt.Println(utils.CheckedItem.Render(), path)
-		conf.Dock.Others = append(conf.Dock.Others, config.Folder{
-			Path:    path,
-			Sort:    item.TileData.Arrangement,
-			Display: item.TileData.DisplayAs,
-			View:    item.TileData.ShowAs,
-		})
-	}
-
-	conf.Dock.Settings = &config.DockSettings{
-		TileSize:              dPlist.TileSize,
-		LargeSize:             dPlist.LargeSize,
-		Magnification:         dPlist.Magnification,
-		MinimizeToApplication: dPlist.MinimizeToApplication,
-		AutoHide:              dPlist.AutoHide,
-		ShowRecents:           dPlist.ShowRecents,
-		SizeImmutable:         dPlist.SizeImmutable,
+		return errors.Wrap(err, "unable to generate config from dock plist")
 	}
 
 	if err := os.MkdirAll(filepath.Dir(c.File), 0750); err != nil {
 		return fmt.Errorf("failed to create config dir: %w", err)
 	}
 
-	var buf bytes.Buffer
-	enc := yaml.NewEncoder(&buf)
+	buf := new(bytes.Buffer)
+	enc := yaml.NewEncoder(buf)
 	enc.SetIndent(2)
 	if err := enc.Encode(&conf); err != nil {
 		if err := enc.Close(); err != nil {
@@ -100,9 +67,7 @@ func SaveConfig(c *Config) (err error) {
 }
 
 func LoadConfig(c *Config) (err error) {
-	var conf config.Config
-
-	conf, err = config.Load(c.File)
+	conf, err := config.Load(c.File)
 	if err != nil {
 		return fmt.Errorf("failed to load config file: %v", err)
 	}

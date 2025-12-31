@@ -7,6 +7,8 @@ import (
 )
 
 func Test_Verify(t *testing.T) {
+	t.Parallel()
+
 	file := filepath.Join(t.TempDir(), "subdir", "cfg.yml")
 
 	tests := map[string]struct {

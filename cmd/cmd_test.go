@@ -8,6 +8,8 @@ import (
 )
 
 func Test_New_has_subcommands_and_version(t *testing.T) {
+	t.Parallel()
+
 	cmd := New()
 	if cmd == nil {
 		t.Fatalf("New() returned nil")
@@ -25,6 +27,8 @@ func Test_New_has_subcommands_and_version(t *testing.T) {
 }
 
 func Test_CommandFlags(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		makeCmd func() *cobra.Command
 	}{
@@ -51,6 +55,8 @@ func Test_CommandFlags(t *testing.T) {
 }
 
 func Test_execCommands(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		makeCmd func() *cobra.Command
 		execFn  func(*cobra.Command, []string) error
