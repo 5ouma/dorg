@@ -87,16 +87,16 @@ func LoadDockPlist() (*Plist, error) {
 		return nil, fmt.Errorf("failed to get user home directory: %v", err)
 	}
 
-	var dPlist Plist
+	dPlist := new(Plist)
 	data, err := os.ReadFile(filepath.Join(home, dockPlistPath))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read dock plist: %v", err)
 	}
-	if _, err := plist.Unmarshal(data, &dPlist); err != nil {
+	if _, err := plist.Unmarshal(data, dPlist); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal dock plist: %v", err)
 	}
 
-	return &dPlist, nil
+	return dPlist, nil
 }
 
 func (p *Plist) AddApp(appPath string) {

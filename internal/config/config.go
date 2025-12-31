@@ -34,16 +34,16 @@ type DockSettings struct {
 }
 
 func Load(file string) (Config, error) {
-	var conf Config
+	conf := new(Config)
 
 	data, err := os.ReadFile(file)
 	if err != nil {
-		return conf, err
+		return *conf, err
 	}
 
-	if err := yaml.Unmarshal(data, &conf); err != nil {
-		return conf, err
+	if err := yaml.Unmarshal(data, conf); err != nil {
+		return *conf, err
 	}
 
-	return conf, nil
+	return *conf, nil
 }

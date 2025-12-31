@@ -78,8 +78,8 @@ func SaveConfig(c *Config) (err error) {
 		return fmt.Errorf("failed to create config dir: %w", err)
 	}
 
-	var buf bytes.Buffer
-	enc := yaml.NewEncoder(&buf)
+	buf := new(bytes.Buffer)
+	enc := yaml.NewEncoder(buf)
 	enc.SetIndent(2)
 	if err := enc.Encode(&conf); err != nil {
 		if err := enc.Close(); err != nil {
@@ -100,9 +100,7 @@ func SaveConfig(c *Config) (err error) {
 }
 
 func LoadConfig(c *Config) (err error) {
-	var conf config.Config
-
-	conf, err = config.Load(c.File)
+	conf, err := config.Load(c.File)
 	if err != nil {
 		return fmt.Errorf("failed to load config file: %v", err)
 	}

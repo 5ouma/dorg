@@ -33,7 +33,7 @@ var (
 )
 
 func RunCommand(ctx context.Context, cmd string, args ...string) (string, error) {
-	var c *exec.Cmd
+	c := new(exec.Cmd)
 
 	if ctx != nil {
 		c = exec.CommandContext(ctx, cmd, args...)
