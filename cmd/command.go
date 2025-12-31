@@ -17,6 +17,7 @@ func New() *cobra.Command {
 	cmd.SetVersionTemplate("🚥 {{.Use}} {{.Version}}\n")
 	cmd.SetErrPrefix(" 🚨")
 	cmd.AddCommand(
+		newCheckCmd(),
 		newLoadCmd(),
 		newSaveCmd(),
 	)
