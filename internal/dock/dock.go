@@ -242,3 +242,44 @@ func (p *Plist) restart() error {
 	}
 	return nil
 }
+
+func (p *Plist) GenerateConfigFromPlist() (config.Config, error) {
+	conf := new(config.Config)
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return *conf, fmt.Errorf("failed to get user home dir: %w", err)
+	}
+
+	fmt.Println(utils.H2.Render("Apps"))
+	for _, item := range p.PersistentApps {
+		fmt.Println(utils.CheckedItem.Render(), item.TileData.GetPath())
+		conf.Dock.Apps = append(conf.Dock.Apps, item.TileData.GetPath())
+	}
+
+	fmt.Println(utils.H2.Render("Folders"))
+	for _, item := range p.PersistentOthers {
+		path := item.TileData.GetPath()
+		if relPath, err := filepath.Rel(home, path); err == nil {
+			path = filepath.Join("~", relPath)
+		}
+		fmt.Println(utils.CheckedItem.Render(), path)
+		conf.Dock.Others = append(conf.Dock.Others, config.Folder{
+			Path:    path,
+			Sort:    item.TileData.Arrangement,
+			Display: item.TileData.DisplayAs,
+			View:    item.TileData.ShowAs,
+		})
+	}
+
+	conf.Dock.Settings = &config.DockSettings{
+		TileSize:              p.TileSize,
+		LargeSize:             p.LargeSize,
+		Magnification:         p.Magnification,
+		MinimizeToApplication: p.MinimizeToApplication,
+		AutoHide:              p.AutoHide,
+		ShowRecents:           p.ShowRecents,
+	}
+
+	return *conf, nil
+}
