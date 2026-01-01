@@ -13,8 +13,8 @@ import (
 func newLoadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "load",
-		Short: "Load Dock settings",
-		Long:  "📂 Load Dock settings config from YAML file",
+		Short: "Load Dock items",
+		Long:  "📂 Load Dock items and settings from YAML file",
 		Args:  cobra.NoArgs,
 		RunE:  execLoadCmd,
 	}

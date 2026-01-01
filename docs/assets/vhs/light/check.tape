@@ -4,7 +4,7 @@ Require dorg
 
 Set FontSize 40
 Set FontFamily "Fira Code Retina"
-Set Height 1000
+Set Height 1100
 Set Width 1800
 Set Theme { "background": "#f7f8fa", "foreground": "#242424", "cursor": "#242424" }
 Set Padding 30

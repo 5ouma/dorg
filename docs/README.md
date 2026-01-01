@@ -62,9 +62,10 @@ Usage:
   dorg [command]
 
 Available Commands:
+  check       Check Dock items
   help        Help about any command
-  load        Load Dock settings
-  save        Save Dock settings
+  load        Load Dock items
+  save        Save Dock items
 
 Flags:
   -h, --help      help for dorg
@@ -80,7 +81,7 @@ Use "dorg [command] --help" for more information about a command.
 ### 📂 `Load`
 
 ```sh
-📂 Load Dock settings config from YAML file
+📂 Load Dock items and settings from YAML file
 
 Usage:
   dorg load [flags]
@@ -110,7 +111,7 @@ Flags:
 ### 💾 `Save`
 
 ```sh
-💾 Save current Dock settings to YAML file
+💾 Save the current Dock items and settings to YAML file
 
 Usage:
   dorg save [flags]
@@ -140,7 +141,7 @@ Flags:
 ### 🔍 `Check`
 
 ```sh
-🔍 Check the Login Items are up-to-date
+🔍 Check the current Dock items are up-to-date
 
 Usage:
   dorg check [flags]

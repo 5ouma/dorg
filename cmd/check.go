@@ -16,8 +16,8 @@ import (
 func newCheckCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "check",
-		Short: "Check Login Items",
-		Long:  "🔍 Check the Login Items are up-to-date",
+		Short: "Check Dock items",
+		Long:  "🔍 Check the current Dock items are up-to-date",
 		Args:  cobra.NoArgs,
 		RunE:  execCheckCmd,
 	}
