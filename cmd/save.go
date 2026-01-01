@@ -13,8 +13,8 @@ import (
 func newSaveCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "save",
-		Short: "Save Dock settings",
-		Long:  "💾 Save current Dock settings to YAML file",
+		Short: "Save Dock items",
+		Long:  "💾 Save the current Dock items and settings to YAML file",
 		Args:  cobra.NoArgs,
 		RunE:  execSaveCmd,
 	}
