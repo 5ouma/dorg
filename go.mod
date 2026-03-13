@@ -3,7 +3,7 @@ module github.com/5ouma/dorg
 go 1.25.5
 
 require (
-	charm.land/lipgloss/v2 v2.0.1
+	charm.land/lipgloss/v2 v2.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	gopkg.in/yaml.v3 v3.0.1
