@@ -279,6 +279,7 @@ func (p *Plist) GenerateConfigFromPlist() (config.Config, error) {
 		MinimizeToApplication: p.MinimizeToApplication,
 		AutoHide:              p.AutoHide,
 		ShowRecents:           p.ShowRecents,
+		SizeImmutable:         p.SizeImmutable,
 	}
 
 	return *conf, nil

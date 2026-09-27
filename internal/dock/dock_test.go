@@ -150,11 +150,12 @@ func Test_GenerateConfigFromPlist(t *testing.T) {
 				MinimizeToApplication: true,
 				AutoHide:              true,
 				ShowRecents:           true,
+				SizeImmutable:         true,
 			},
 			want: config.Config{Dock: config.Dock{
 				Apps:     []string{"/Applications/Calculator.app"},
 				Others:   []config.Folder{{Path: "~/Documents", Sort: 1, Display: 2, View: 3}},
-				Settings: &config.DockSettings{TileSize: 32, LargeSize: 64, Magnification: true, MinimizeToApplication: true, AutoHide: true, ShowRecents: true},
+				Settings: &config.DockSettings{TileSize: 32, LargeSize: 64, Magnification: true, MinimizeToApplication: true, AutoHide: true, ShowRecents: true, SizeImmutable: true},
 			}},
 		},
 	}
