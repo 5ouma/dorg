@@ -9,7 +9,6 @@
 [![GitHub Release](https://img.shields.io/github/v/release/5ouma/dorg?label=Release&style=flat-square)](https://github.com/5ouma/dorg/releases)
 ![GitHub Downloads](https://img.shields.io/github/downloads/5ouma/dorg/total?label=Downloads&style=flat-square)
 [![Go Docs](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/5ouma/dorg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/5ouma/dorg?style=flat-square)](https://goreportcard.com/report/github.com/5ouma/dorg)
 <br />
 [![CI](https://img.shields.io/github/actions/workflow/status/5ouma/dorg/ci.yml?label=CI&style=flat-square)](https://github.com/5ouma/dorg/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/actions/workflow/status/5ouma/dorg/release.yml?label=Release&style=flat-square)](https://github.com/5ouma/dorg/actions/workflows/release.yml)
