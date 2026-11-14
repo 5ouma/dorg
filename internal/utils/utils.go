@@ -63,17 +63,16 @@ func SetLogLevel(verbose bool) int {
 	return int(slog.LevelWarn)
 }
 
-func RestartDock() error {
+func RestartDock(runCommand func(context.Context, string, ...string) (string, error)) error {
 	slog.Debug("restarting Dock")
-	if _, err := RunCommand(context.Background(), "killall", "Dock"); err != nil {
+	if _, err := runCommand(context.Background(), "killall", "Dock"); err != nil {
 		return errors.Wrap(err, "killing Dock process failed")
 	}
 	time.Sleep(2 * time.Second)
 	return nil
 }
 
-func Version() string {
-	info, ok := debug.ReadBuildInfo()
+func Version(info *debug.BuildInfo, ok bool) string {
 	if !ok {
 		return "unknown"
 	}
