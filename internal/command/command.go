@@ -11,7 +11,7 @@ import (
 	"github.com/5ouma/dorg/internal/dock"
 	"github.com/5ouma/dorg/internal/utils"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 type Config struct {
