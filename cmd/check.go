@@ -19,14 +19,16 @@ func newCheckCmd() *cobra.Command {
 		Short: "Check Dock items",
 		Long:  "🔍 Check the current Dock items are up-to-date",
 		Args:  cobra.NoArgs,
-		RunE:  execCheckCmd,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return execCheckCmd(cmd, args, dock.LoadDockPlist)
+		},
 	}
 	cmd.PersistentFlags().String("file", "dorg.yml", "config file")
 	cmd.PersistentFlags().BoolP("verbose", "V", false, "verbose output")
 	return cmd
 }
 
-func execCheckCmd(cmd *cobra.Command, args []string) error {
+func execCheckCmd(cmd *cobra.Command, args []string, loadDock func() (*dock.Plist, error)) error {
 	file, err := cmd.Flags().GetString("file")
 	if err != nil {
 		return err
@@ -47,7 +49,7 @@ func execCheckCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	plistCfg, err := loadPlistConfig()
+	plistCfg, err := loadPlistConfig(loadDock)
 	if err != nil {
 		return err
 	}
@@ -74,8 +76,8 @@ func loadFileConfig(path string) ([]byte, error) {
 	return data, nil
 }
 
-func loadPlistConfig() ([]byte, error) {
-	plist, err := dock.LoadDockPlist()
+func loadPlistConfig(loadDock func() (*dock.Plist, error)) ([]byte, error) {
+	plist, err := loadDock()
 	if err != nil {
 		return nil, err
 	}

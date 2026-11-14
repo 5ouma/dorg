@@ -117,7 +117,7 @@ func (p *Plist) AddApp(appPath string) {
 	p.PersistentApps = append(p.PersistentApps, paItem)
 }
 
-func (p *Plist) AddOther(other config.Folder) error {
+func (p *Plist) AddOther(other config.Folder, absPath func(string) (string, error)) error {
 	path := other.Path
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -131,7 +131,7 @@ func (p *Plist) AddOther(other config.Folder) error {
 	} else {
 		return fmt.Errorf("invalid path '%s': must be absolute or start with '~/'", other.Path)
 	}
-	path, err = filepath.Abs(path)
+	path, err = absPath(path)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path for '%s': %v", path, err)
 	}
@@ -155,40 +155,16 @@ func (p *Plist) AddOther(other config.Folder) error {
 	return nil
 }
 
-func (p *Plist) ApplySettings(setting config.DockSettings) error {
+func (p *Plist) ApplySettings(setting config.DockSettings) {
 	p.Magnification = setting.Magnification
 	p.MinimizeToApplication = setting.MinimizeToApplication
 	p.AutoHide = setting.AutoHide
 	p.ShowRecents = setting.ShowRecents
 	p.SizeImmutable = setting.SizeImmutable
-
-	switch v := setting.TileSize.(type) {
-	case float64:
-		if v < 16 && v > 128 {
-			return fmt.Errorf("tile size must be between 16 and 128: %d", setting.TileSize)
-		}
-	case int:
-		if v < 16 && v > 128 {
-			return fmt.Errorf("tile size must be between 16 and 128: %d", setting.TileSize)
-		}
-	}
-
-	switch v := setting.LargeSize.(type) {
-	case float64:
-		if v < 16 && v > 128 {
-			return fmt.Errorf("large size must be between 16 and 128: %d", setting.LargeSize)
-		}
-	case int:
-		if v < 16 && v > 128 {
-			return fmt.Errorf("large size must be between 16 and 128: %d", setting.LargeSize)
-		}
-	}
-
-	return nil
 }
 
-func (p *Plist) Save() error {
-	if err := p.unload(); err != nil {
+func (p *Plist) Save(runCommand func(context.Context, string, ...string) (string, error), closeFile func(*os.File) error) error {
+	if err := p.unload(runCommand); err != nil {
 		return fmt.Errorf("dock save: %w", err)
 	}
 
@@ -206,38 +182,38 @@ func (p *Plist) Save() error {
 	if err := plist.NewBinaryEncoder(file).Encode(p); err != nil {
 		return fmt.Errorf("failed to decode plist: %w", err)
 	}
-	if err := file.Close(); err != nil {
+	if err := closeFile(file); err != nil {
 		return fmt.Errorf("failed to close temp file: %v", err)
 	}
 
-	if err := p.importPlist(file.Name()); err != nil {
+	if err := p.importPlist(file.Name(), runCommand); err != nil {
 		return fmt.Errorf("failed to import plist: %w", err)
 	}
-	return p.restart()
+	return p.restart(runCommand)
 }
 
-func (p *Plist) importPlist(path string) error {
+func (p *Plist) importPlist(path string, runCommand func(context.Context, string, ...string) (string, error)) error {
 	slog.Debug("importing dock plist")
-	if _, err := utils.RunCommand(context.Background(), "/usr/bin/defaults", "import", "com.apple.dock", path); err != nil {
+	if _, err := runCommand(context.Background(), "/usr/bin/defaults", "import", "com.apple.dock", path); err != nil {
 		return fmt.Errorf("failed to defaults import dock plist '%s': %v", path, err)
 	}
 	return nil
 }
 
-func (p *Plist) unload() error {
+func (p *Plist) unload(runCommand func(context.Context, string, ...string) (string, error)) error {
 	slog.Debug("unloading Dock launch agent")
-	if _, err := utils.RunCommand(context.Background(), "/bin/launchctl", "unload", dockLaunchAgentPath); err != nil {
+	if _, err := runCommand(context.Background(), "/bin/launchctl", "unload", dockLaunchAgentPath); err != nil {
 		return fmt.Errorf("failed to unload Dock launch agent: %v", err)
 	}
 	return nil
 }
 
-func (p *Plist) restart() error {
+func (p *Plist) restart(runCommand func(context.Context, string, ...string) (string, error)) error {
 	slog.Debug("restart Dock launch agent")
-	if _, err := utils.RunCommand(context.Background(), "/bin/launchctl", "load", dockLaunchAgentPath); err != nil {
+	if _, err := runCommand(context.Background(), "/bin/launchctl", "load", dockLaunchAgentPath); err != nil {
 		return fmt.Errorf("failed to load Dock launch agent: %v", err)
 	}
-	if _, err := utils.RunCommand(context.Background(), "/bin/launchctl", "start", dockLaunchAgentID); err != nil {
+	if _, err := runCommand(context.Background(), "/bin/launchctl", "start", dockLaunchAgentID); err != nil {
 		return fmt.Errorf("failed to start Dock launch agent: %v", err)
 	}
 	return nil

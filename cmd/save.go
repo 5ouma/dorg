@@ -6,8 +6,10 @@ import (
 	"os"
 
 	"github.com/5ouma/dorg/internal/command"
+	"github.com/5ouma/dorg/internal/dock"
 	"github.com/5ouma/dorg/internal/utils"
 	"github.com/spf13/cobra"
+	"go.yaml.in/yaml/v4"
 )
 
 func newSaveCmd() *cobra.Command {
@@ -16,14 +18,16 @@ func newSaveCmd() *cobra.Command {
 		Short: "Save Dock items",
 		Long:  "💾 Save the current Dock items and settings to YAML file",
 		Args:  cobra.NoArgs,
-		RunE:  execSaveCmd,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return execSaveCmd(cmd, args, dock.LoadDockPlist, (*yaml.Encoder).Close)
+		},
 	}
 	cmd.PersistentFlags().String("file", "dorg.yml", "config file")
 	cmd.PersistentFlags().BoolP("verbose", "V", false, "verbose output")
 	return cmd
 }
 
-func execSaveCmd(cmd *cobra.Command, args []string) error {
+func execSaveCmd(cmd *cobra.Command, args []string, loadDock func() (*dock.Plist, error), closeEncoder func(*yaml.Encoder) error) error {
 	file, err := cmd.Flags().GetString("file")
 	if err != nil {
 		return err
@@ -48,5 +52,5 @@ func execSaveCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(utils.H1.Render("💾 Save Dock settings"))
-	return command.SaveConfig(cfg)
+	return command.SaveConfig(cfg, loadDock, closeEncoder)
 }
