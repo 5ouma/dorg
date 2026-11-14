@@ -1,9 +1,9 @@
 module github.com/5ouma/dorg
 
-go 1.25.5
+go 1.26.7
 
 require (
-	charm.land/lipgloss/v2 v2.0.6
+	charm.land/lipgloss/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	gopkg.in/yaml.v3 v3.0.1
