@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -30,8 +31,8 @@ func (c *Config) Verify() error {
 	return nil
 }
 
-func SaveConfig(c *Config) (err error) {
-	dPlist, err := dock.LoadDockPlist()
+func SaveConfig(c *Config, loadDock func() (*dock.Plist, error), closeEncoder func(*yaml.Encoder) error) error {
+	dPlist, err := loadDock()
 	if err != nil {
 		return errors.Wrap(err, "unable to load dock plist")
 	}
@@ -49,12 +50,12 @@ func SaveConfig(c *Config) (err error) {
 	enc := yaml.NewEncoder(buf)
 	enc.SetIndent(2)
 	if err := enc.Encode(&conf); err != nil {
-		if err := enc.Close(); err != nil {
+		if err := closeEncoder(enc); err != nil {
 			slog.Warn("failed to close encoder after encode error", "error", err)
 		}
 		return errors.Wrap(err, "unable to encode YAML for logging")
 	}
-	if err := enc.Close(); err != nil {
+	if err := closeEncoder(enc); err != nil {
 		return errors.Wrap(err, "unable to close encoder")
 	}
 	data := buf.Bytes()
@@ -66,7 +67,7 @@ func SaveConfig(c *Config) (err error) {
 	return nil
 }
 
-func LoadConfig(c *Config) (err error) {
+func LoadConfig(c *Config, loadDock func() (*dock.Plist, error), runCommand func(context.Context, string, ...string) (string, error)) error {
 	conf, err := config.Load(c.File)
 	if err != nil {
 		return fmt.Errorf("failed to load config file: %v", err)
@@ -76,7 +77,7 @@ func LoadConfig(c *Config) (err error) {
 		return errors.Errorf("no dock configuration found in config file")
 	}
 
-	dPlist, err := dock.LoadDockPlist()
+	dPlist, err := loadDock()
 	if err != nil {
 		return errors.Wrap(err, "unable to load dock plist")
 	}
@@ -96,20 +97,18 @@ func LoadConfig(c *Config) (err error) {
 	fmt.Println(utils.H2.Render("Folders"))
 	for _, other := range conf.Dock.Others {
 		fmt.Println(utils.CheckedItem.Render(), other.Path)
-		if err := dPlist.AddOther(other); err != nil {
+		if err := dPlist.AddOther(other, filepath.Abs); err != nil {
 			return errors.Wrapf(err, "unable to add other %s", other.Path)
 		}
 	}
 
 	if conf.Dock.Settings != nil {
-		if err := dPlist.ApplySettings(*conf.Dock.Settings); err != nil {
-			return fmt.Errorf("failed to apply dock settings: %w", err)
-		}
+		dPlist.ApplySettings(*conf.Dock.Settings)
 	}
 
-	if err := dPlist.Save(); err != nil {
+	if err := dPlist.Save(runCommand, (*os.File).Close); err != nil {
 		return fmt.Errorf("failed to save dock plist: %w", err)
 	}
 
-	return utils.RestartDock()
+	return utils.RestartDock(runCommand)
 }
