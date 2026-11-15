@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Returns the build version for the current dorg binary.
 func Version(info *debug.BuildInfo, ok bool) string {
 	if !ok {
 		return "unknown"

@@ -20,6 +20,7 @@ const (
 	dockLaunchAgentPath = "/System/Library/LaunchAgents/com.apple.Dock.agent.plist"
 )
 
+// Stores the macOS Dock state loaded from com.apple.dock.plist.
 type Plist struct {
 	PersistentApps        []PAItem `plist:"persistent-apps"`
 	PersistentOthers      []POItem `plist:"persistent-others"`
@@ -32,34 +33,40 @@ type Plist struct {
 	SizeImmutable         bool     `plist:"size-immutable"`
 }
 
+// Contains the file URL metadata stored by Dock tiles.
 type FileData struct {
 	URLString     string `plist:"_CFURLString"`
 	URLStringType int    `plist:"_CFURLStringType"`
 }
 
+// Describes the backing file metadata for an app tile.
 type TileData struct {
 	FileData FileData `plist:"file-data"`
 	FileType int      `plist:"file-type"`
 }
 
+// Returns the file path represented by the tile.
 func (d TileData) GetPath() string {
 	out := strings.TrimPrefix(d.FileData.URLString, "file://")
 	out = strings.TrimSuffix(out, "/")
 	return strings.ReplaceAll(out, "%20", " ")
 }
 
+// Stores an application tile in the macOS Dock plist.
 type PAItem struct {
 	GUID     int      `plist:"GUID,omitempty"`
 	TileType string   `plist:"tile-type"`
 	TileData TileData `plist:"tile-data"`
 }
 
+// Stores a folder or other persistent item in the Dock.
 type POItem struct {
 	GUID     int        `plist:"GUID"`
 	TileType string     `plist:"tile-type"`
 	TileData POTileData `plist:"tile-data"`
 }
 
+// Contains the metadata for a Dock folder tile.
 type POTileData struct {
 	Arrangement int      `plist:"arrangement"`
 	DisplayAs   int      `plist:"displayas"`
@@ -70,6 +77,7 @@ type POTileData struct {
 	Directory   int      `plist:"directory,omitempty"`
 }
 
+// Returns the directory path represented by the folder tile.
 func (d POTileData) GetPath() string {
 	out := strings.TrimPrefix(d.FileData.URLString, "file://")
 	out = strings.TrimSuffix(out, "/")
@@ -81,6 +89,7 @@ func fileNameWithoutExtTrimSuffix(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
 
+// Reads the user's current Dock plist from the macOS preferences directory.
 func LoadDockPlist() (*Plist, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -99,6 +108,7 @@ func LoadDockPlist() (*Plist, error) {
 	return dPlist, nil
 }
 
+// Appends an application tile to the Dock plist.
 func (p *Plist) AddApp(appPath string) {
 	var paItem PAItem
 	switch appPath {
@@ -117,6 +127,7 @@ func (p *Plist) AddApp(appPath string) {
 	p.PersistentApps = append(p.PersistentApps, paItem)
 }
 
+// Appends a folder tile for a Dock item using the supplied path metadata.
 func (p *Plist) AddOther(other config.Folder, absPath func(string) (string, error)) error {
 	path := other.Path
 	home, err := os.UserHomeDir()
@@ -155,6 +166,7 @@ func (p *Plist) AddOther(other config.Folder, absPath func(string) (string, erro
 	return nil
 }
 
+// Updates the Dock's global display and behavior settings.
 func (p *Plist) ApplySettings(setting config.DockSettings) {
 	p.Magnification = setting.Magnification
 	p.MinimizeToApplication = setting.MinimizeToApplication
@@ -163,6 +175,7 @@ func (p *Plist) ApplySettings(setting config.DockSettings) {
 	p.SizeImmutable = setting.SizeImmutable
 }
 
+// Writes the Dock plist back to macOS and reloads the Dock agent.
 func (p *Plist) Save(runCommand func(context.Context, string, ...string) (string, error), closeFile func(*os.File) error) error {
 	if err := p.unload(runCommand); err != nil {
 		return fmt.Errorf("dock save: %w", err)
@@ -219,6 +232,7 @@ func (p *Plist) restart(runCommand func(context.Context, string, ...string) (str
 	return nil
 }
 
+// Converts the current Dock plist into the YAML config model used by dorg.
 func (p *Plist) GenerateConfigFromPlist() (config.Config, error) {
 	conf := new(config.Config)
 
