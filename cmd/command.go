@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Creates and configures the root Cobra command for dorg.
 func New() *cobra.Command {
 	info, ok := debug.ReadBuildInfo()
 	cmd := &cobra.Command{

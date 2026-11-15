@@ -15,12 +15,14 @@ import (
 	"go.yaml.in/yaml/v4"
 )
 
+// Captures the runtime settings needed for a Dock config operation.
 type Config struct {
 	Cmd      string
 	File     string
 	LogLevel int
 }
 
+// Ensures the configuration directory exists before loading or saving YAML.
 func (c *Config) Verify() error {
 	if err := os.MkdirAll(filepath.Dir(c.File), 0750); err != nil {
 		return fmt.Errorf("failed to create config dir: %w", err)
@@ -31,6 +33,7 @@ func (c *Config) Verify() error {
 	return nil
 }
 
+// Writes the current macOS Dock state to a YAML file.
 func SaveConfig(c *Config, loadDock func() (*dock.Plist, error), closeEncoder func(*yaml.Encoder) error) error {
 	dPlist, err := loadDock()
 	if err != nil {
@@ -67,6 +70,7 @@ func SaveConfig(c *Config, loadDock func() (*dock.Plist, error), closeEncoder fu
 	return nil
 }
 
+// Applies a Dock YAML configuration to the current Dock plist.
 func LoadConfig(c *Config, loadDock func() (*dock.Plist, error), runCommand func(context.Context, string, ...string) (string, error)) error {
 	conf, err := config.Load(c.File)
 	if err != nil {
