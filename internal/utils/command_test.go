@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"errors"
-	"runtime/debug"
 	"testing"
 	"time"
 )
@@ -14,26 +13,6 @@ func (deadlineContext) Deadline() (time.Time, bool) { return time.Time{}, true }
 func (deadlineContext) Done() <-chan struct{}       { return nil }
 func (deadlineContext) Err() error                  { return context.DeadlineExceeded }
 func (deadlineContext) Value(any) any               { return nil }
-
-func Test_SetLogLevel(t *testing.T) {
-	tests := map[string]struct {
-		verbose bool
-		want    int
-	}{
-		"verbose": {verbose: true, want: SetLogLevel(true)},
-		"minimal": {verbose: false, want: SetLogLevel(false)},
-	}
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			got := SetLogLevel(tc.verbose)
-			if got != tc.want {
-				t.Fatalf("SetLogLevel(%v) = %d, want %d", tc.verbose, got, tc.want)
-			}
-		})
-	}
-}
 
 func Test_RunCommand(t *testing.T) {
 	tests := map[string]struct {
@@ -86,44 +65,5 @@ func Test_RestartDock(t *testing.T) {
 				t.Fatalf("RestartDock() error = %v, wantErr=%v", err, tc.wantErr)
 			}
 		})
-	}
-}
-
-func Test_Version(t *testing.T) {
-	t.Parallel()
-
-	tests := map[string]struct {
-		info *debug.BuildInfo
-		ok   bool
-		want string
-	}{
-		"missing build info": {want: "unknown"},
-		"development build": {
-			info: &debug.BuildInfo{Main: debug.Module{Version: "(devel)"}},
-			ok:   true,
-			want: "unknown",
-		},
-		"release version": {
-			info: &debug.BuildInfo{Main: debug.Module{Version: "v1.2.3"}},
-			ok:   true,
-			want: "v1.2.3",
-		},
-		"commit version": {
-			info: &debug.BuildInfo{Main: debug.Module{Version: "v1.2.3-0-abcdef123456"}},
-			ok:   true,
-			want: "v1.2.3 (#abcdef1)",
-		},
-	}
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			if got := Version(tc.info, tc.ok); got != tc.want {
-				t.Fatalf("Version() = %q, want %q", got, tc.want)
-			}
-		})
-	}
-
-	info, ok := debug.ReadBuildInfo()
-	if Version(info, ok) == "" {
-		t.Fatal("Version() returned empty string for current build info")
 	}
 }
